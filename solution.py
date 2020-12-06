@@ -30,8 +30,26 @@ class NaiveBayesClassifier:
 if __name__ == "__main__":
     df = pd.read_csv("data/house-votes-84.data")
     df.columns = ["class"] + list(map(str, range(16)))
-    classifier = NaiveBayesClassifier(df)
-    prediction = classifier.predict(
-        ["y", "n", "n", "y", "y", "n", "y", "y", "y", "n", "n", "y", "y", "y", "n", "y"]
-    )
-    assert "republican" == prediction, "Underfitting"
+
+    # Perform 10-fold cross validation
+    accuracies = []
+    for start_index in range(0, 430, 43):
+        end_index = start_index + 42
+        print(f"Testing with {start_index}:{end_index}...")
+
+        learning_df = df[:start_index].append(df[end_index+1:])
+        classifier = NaiveBayesClassifier(learning_df)
+
+        correct = 0
+        tested_count = 0
+        for test_vector_index in range(start_index, end_index+1):
+            test_vector = df.loc[test_vector_index]
+            prediction = classifier.predict(test_vector[1:])
+            if test_vector[0] == prediction:
+                correct += 1
+            tested_count += 1
+        accuracies.append(correct / tested_count)
+        print(f"Accuracy: {accuracies[-1]:.2%}\n")
+
+    avg = sum(accuracies) / len(accuracies)
+    print(f"Overall Accuracy by 10-fold validation: {avg:.2%}")
