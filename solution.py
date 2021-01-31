@@ -29,6 +29,7 @@ class NaiveBayesClassifier:
 
 if __name__ == "__main__":
     df = pd.read_csv("data/house-votes-84.data")
+    df = df.sample(frac=1).reset_index(drop=True)  # shuffle
     df.columns = ["class"] + list(map(str, range(16)))
 
     # Perform 10-fold cross validation
